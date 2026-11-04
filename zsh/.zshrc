@@ -64,5 +64,8 @@ export RIPGREP_CONFIG_PATH="$HOME/.ripgreprc"
 # https://github.com/vercel-labs/agent-browser/issues/1688
 export AGENT_BROWSER_AUTOSAVE_INTERVAL_MS=0
 
+# Rex supports OSC 8 links, but Claude Code doesn't recognize TERM_PROGRAM=rex yet
+[[ "$TERM_PROGRAM" == "rex" ]] && export FORCE_HYPERLINK=1
+
 # gwt shell integration
 eval "$(command gwt shell init zsh)"
