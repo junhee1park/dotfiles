@@ -20,9 +20,9 @@ THEME=$(echo "$THEME_DISPLAY" | tr '[:upper:]' '[:lower:]' | sed 's/ /-/g')
 if [ -n "$THEME" ] && [ "$THEME" != "<<-quit" ]; then
   DOTFILES_DIR="${0:A:h}"
 
-  git update-index --skip-worktree tmux/tmux.theme.conf
-  git update-index --skip-worktree ghostty/theme
-  git update-index --skip-worktree btop/themes/current.theme
+  git -C "$DOTFILES_DIR" update-index --skip-worktree tmux/tmux.theme.conf
+  git -C "$DOTFILES_DIR" update-index --skip-worktree ghostty/theme
+  git -C "$DOTFILES_DIR" update-index --skip-worktree btop/themes/current.theme
 
   cp "$DOTFILES_DIR/themes/$THEME/tmux.conf" ~/.tmux/tmux.theme.conf
   cp "$DOTFILES_DIR/themes/$THEME/neovim.lua" ~/.config/nvim/lua/plugins/theme.lua

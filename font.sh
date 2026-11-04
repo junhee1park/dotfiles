@@ -18,9 +18,9 @@ FONT_DISPLAY=$(gum choose "${FONT_NAMES[@]}" "<< Quit" --header "Choose your fon
 FONT=$(echo "$FONT_DISPLAY" | tr '[:upper:]' '[:lower:]' | sed 's/ /-/g')
 
 if [ -n "$FONT" ] && [ "$FONT" != "<<-quit" ]; then
-  DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  DOTFILES_DIR="${0:A:h}"
 
-  git update-index --skip-worktree ghostty/font
+  git -C "$DOTFILES_DIR" update-index --skip-worktree ghostty/font
 
   cp "$DOTFILES_DIR/fonts/$FONT" ~/.config/ghostty/font
 
