@@ -31,5 +31,10 @@ if [ -n "$THEME" ] && [ "$THEME" != "<<-quit" ]; then
 
   tmux source ~/.tmux.conf
   pkill -SIGUSR2 ghostty
+  # Rex names the themes after their Ghostty files, which spell it "TokyoNight".
+  if command -v rex &>/dev/null; then
+    rex do client.theme.change name="${THEME_DISPLAY/Tokyo Night/TokyoNight}" >/dev/null ||
+      echo "Rex theme not changed (is Remote Control on in Rex settings?)"
+  fi
   echo "Theme changed to $THEME_DISPLAY"
 fi
