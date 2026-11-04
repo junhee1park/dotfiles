@@ -67,5 +67,9 @@ export AGENT_BROWSER_AUTOSAVE_INTERVAL_MS=0
 # Rex supports OSC 8 links, but Claude Code doesn't recognize TERM_PROGRAM=rex yet
 [[ "$TERM_PROGRAM" == "rex" ]] && export FORCE_HYPERLINK=1
 
+# Claude Code drops to 256 colors inside tmux unless told the outer terminal
+# passes RGB through, which tmux.conf already sets up
+export CLAUDE_CODE_TMUX_TRUECOLOR=1
+
 # gwt shell integration
 eval "$(command gwt shell init zsh)"
