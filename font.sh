@@ -25,5 +25,16 @@ if [ -n "$FONT" ] && [ "$FONT" != "<<-quit" ]; then
   cp "$DOTFILES_DIR/fonts/$FONT" ~/.config/ghostty/font
 
   pkill -SIGUSR2 ghostty
+
+  # Rex reads its font only at launch, and a running Rex writes its own
+  # settings back on quit, so quit it before writing and reopen it after.
+  rex_font=$(sed -n 's/^font-family = "\(.*\)"$/\1/p' "$DOTFILES_DIR/fonts/$FONT" | head -1)
+  rex_was_running=$(pgrep -xq Rex && echo 1)
+  if [[ -n "$rex_was_running" ]]; then
+    killall Rex
+    while pgrep -xq Rex; do sleep 0.2; done
+  fi
+  defaults write com.superlogical.rex Workspace.terminalFontName -string "$rex_font"
+  [[ -n "$rex_was_running" ]] && open -a "Rex Beta"
   echo "Font changed to $FONT_DISPLAY"
 fi
