@@ -1,11 +1,9 @@
 [user]
 	name = Junhee Park
 	email = 12604726+junhee1park@users.noreply.github.com
-	signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICxO+KX7guvfvwH0x29vtCwNHNsgNINDgFZHd/m9Yw2o
+	signingkey = ~/.ssh/github_sign
 [gpg]
 	format = ssh
-[gpg "ssh"]
-	program = /Applications/1Password.app/Contents/MacOS/op-ssh-sign
 [commit]
 	gpgsign = true
 [alias]

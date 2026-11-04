@@ -1,0 +1,10 @@
+Include ~/.ssh/1Password/config
+
+# Copies of the 1Password keys, so pushing never waits on an approval prompt.
+Host github.com
+	IdentityFile ~/.ssh/github_auth
+	IdentitiesOnly yes
+	IdentityAgent none
+
+Host *
+	IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"

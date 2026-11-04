@@ -44,4 +44,5 @@ else
     echo # Add a separator between each script output
   done
   echo -e "${GREEN}${BOLD}All installations complete!${NC}"
+  echo "Next: sign in to 1Password, turn on Settings > Developer > \"Integrate with 1Password CLI\", then run ./install.sh ssh"
 fi
