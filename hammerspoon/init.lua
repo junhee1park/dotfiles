@@ -29,7 +29,7 @@ hs.hotkey.bind({ "cmd", "ctrl" }, "b", function()
 end)
 
 hs.hotkey.bind({ "cmd", "ctrl" }, "t", function()
-  moveWindowToFocusedSpace("Ghostty")
+  moveWindowToFocusedSpace("Rex Beta")
 end)
 
 hs.hotkey.bind({ "cmd", "ctrl" }, "n", function()
@@ -45,7 +45,7 @@ hs.hotkey.bind({ "cmd", "ctrl" }, "a", function()
 end)
 
 hs.hotkey.bind({ "cmd", "ctrl" }, "j", function()
-  moveWindowToFocusedSpace("ChatGPT")
+  moveWindowToFocusedSpace("Claude")
 end)
 
 -- for work
