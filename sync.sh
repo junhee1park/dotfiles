@@ -18,11 +18,13 @@ AGENT_LABEL="com.junhee.dotfiles.sync-export"
 AGENT_PLIST="$HOME/Library/LaunchAgents/$AGENT_LABEL.plist"
 LEGACY_AGENT_LABEL="com.junhee.dotfiles.prefs-export"
 
-# <defaults domain>:<process name to quit before importing>
+# <defaults domain>:<process name to quit before importing>[:<app name to
+# reopen, when it differs from the process name>]
 DOMAINS=(
   "com.knollsoft.Rectangle:Rectangle"
   "pl.maketheweb.cleanshotx:CleanShot X"
   "com.lwouis.alt-tab-macos:AltTab"
+  "com.superlogical.rex:Rex:Rex Beta"
 )
 
 # <name>:<toml|json>:<config the app owns>:<snapshot, relative to the repo>
@@ -59,6 +61,16 @@ keeps_for() {
         "showKeystrokes" "keyboardOverlayPosition" "highlightClicks" \
         "autoClosePopup" "popupAutoCloseMode" \
         "showMenubarIcon"
+      ;;
+    com.superlogical.rex)
+      # darkThemeID names one of customThemes, so the two travel together.
+      print -l \
+        "Workspace.terminalFontName" "Workspace.terminalFontPointSize" \
+        "Workspace.terminalCellHeightPercent" "Workspace.terminalFallbackFontNames" \
+        "Workspace.customThemes" "Workspace.darkThemeID" \
+        "Workspace.inactivePaneFadeMode" "Workspace.usesStandardInactiveWindowPaneStyles" \
+        "Workspace.showsActivePaneBorder" \
+        "rex.client.remoteControl"
       ;;
     com.lwouis.alt-tab-macos)
       # Keys carry no suffix for shortcut set 1 and a "2" for set 2
@@ -319,10 +331,12 @@ cmd_import() {
 
   mkdir -p "$BASELINE_DIR"
 
-  local entry domain app snapshot baseline
+  local entry domain process app snapshot baseline
   for entry in "${DOMAINS[@]}"; do
     domain="${entry%%:*}"
     app="${entry#*:}"
+    process="${app%%:*}"
+    app="${app#*:}"
     snapshot="$PREFS_DIR/$domain.plist"
     baseline="$BASELINE_DIR/$domain.plist"
 
@@ -335,7 +349,7 @@ cmd_import() {
     # A running app holds its own copy of the domain and writes it back on quit,
     # which would undo the import.
     print_step "Quitting $app"
-    killall "$app" 2>/dev/null
+    killall "$process" 2>/dev/null
 
     # Merge rather than replace: the snapshot holds only the curated keys, and
     # `defaults import` would otherwise wipe the app's own state, license included.
