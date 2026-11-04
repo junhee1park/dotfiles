@@ -1,0 +1,9 @@
+gapSize
+skipGapTopEdge
+# cycleSizesIsChanged is the switch that makes selectedCycleSizes apply at all
+# (CycleSize.swift), so the two travel together.
+selectedCycleSizes
+cycleSizesIsChanged
+subsequentExecutionMode
+launchOnLogin
+hideMenubarIcon

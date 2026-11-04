@@ -1,0 +1,11 @@
+Workspace.terminalFontName
+Workspace.terminalFontPointSize
+Workspace.terminalCellHeightPercent
+Workspace.terminalFallbackFontNames
+# darkThemeID names one of customThemes, so the two travel together.
+Workspace.customThemes
+Workspace.darkThemeID
+Workspace.inactivePaneFadeMode
+Workspace.usesStandardInactiveWindowPaneStyles
+Workspace.showsActivePaneBorder
+rex.client.remoteControl

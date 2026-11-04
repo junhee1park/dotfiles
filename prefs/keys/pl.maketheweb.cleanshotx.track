@@ -1,0 +1,11 @@
+LAVA*
+exportPath
+afterScreenshotActions
+afterVideoActions
+captureWithoutDesktopIcons
+showKeystrokes
+keyboardOverlayPosition
+highlightClicks
+autoClosePopup
+popupAutoCloseMode
+showMenubarIcon

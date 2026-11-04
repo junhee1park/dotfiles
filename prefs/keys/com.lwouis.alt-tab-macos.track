@@ -1,0 +1,7 @@
+# Keys carry no suffix for shortcut set 1 and a "2" for set 2
+# (Preferences.swift: baseName + (index == 0 ? "" : String(index + 1))).
+# Only set 1 is synced; the rest falls back to AltTab's defaults.
+holdShortcut
+spacesToShow
+screensToShow
+showWindowlessApps

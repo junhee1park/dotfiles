@@ -1,0 +1,6 @@
+# Dotted paths rather than flat keys, since TOML nests. Everything else in
+# config.toml is state Codex writes for itself: absolute project paths, hook
+# trust hashes, plugin caches and bundled app versions.
+tui.whimsy
+tui.status_line
+tui.status_line_use_colors

@@ -20,4 +20,7 @@ brew install gh
 print_header "dasel"
 brew install dasel
 
+print_header "terminal-notifier"
+brew install terminal-notifier
+
 print_success "Development tools setup complete"
