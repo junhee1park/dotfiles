@@ -95,6 +95,18 @@ keeps_for() {
   esac
 }
 
+# Keys that change on their own and would otherwise be reported as untracked
+# changes on every export. They are never synced either way.
+ignores_for() {
+  # Sparkle's last update check, in every app that updates through it.
+  print -l "SULastCheckTime"
+  case "$1" in
+    com.superlogical.rex)
+      print -l "Workspace.programActivitySeen"
+      ;;
+  esac
+}
+
 # Keeps only the allowlisted keys and writes a sorted XML plist so diffs stay
 # readable. Aborts if a secret slips through, and warns about a pattern that
 # matched nothing - that means the app renamed or dropped the key.
@@ -252,6 +264,42 @@ sync_snapshot() {
   print_step "updated ($counts keys)"
 }
 
+# Lists the keys outside the allowlist and the ignore list that changed since
+# the last export, so a setting changed in the app's UI isn't silently left
+# behind. The full copy it compares against stays in the baseline directory,
+# out of the repo.
+report_untracked() {
+  local kind="$1" full="$2" previous="$3"
+  shift 3
+
+  if [[ -f "$previous" ]]; then
+    python3 - "$kind" "$full" "$previous" "$@" <<'PY'
+import fnmatch, json, plistlib, sys
+
+kind, now_path, prev_path, patterns = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4:]
+
+def load(path):
+    with open(path, "rb") as f:
+        return plistlib.load(f) if kind == "plist" else json.load(f)
+
+now, prev = load(now_path), load(prev_path)
+
+# Plist keys are flat and may contain dots, but a file's allowlist names dotted
+# paths, so there a top-level key counts as tracked when a path starts in it.
+def tracked(key):
+    if kind == "plist":
+        return any(fnmatch.fnmatch(key, p) for p in patterns)
+    return any(fnmatch.fnmatch(key, p.split(".")[0]) for p in patterns)
+
+changed = sorted(k for k in now.keys() | prev.keys()
+                 if not tracked(k) and now.get(k) != prev.get(k))
+if changed:
+    print(", ".join(changed))
+PY
+  fi
+  cp "$full" "$previous"
+}
+
 cmd_export() {
   print_section "Export settings"
   mkdir -p "$PREFS_DIR" "$BASELINE_DIR"
@@ -260,7 +308,7 @@ cmd_export() {
   tmp=$(mktemp -d)
   trap "rm -rf '$tmp'" EXIT
 
-  local entry domain name format config snapshot baseline raw live counts
+  local entry domain name format config snapshot baseline raw live counts untracked
   local -a keeps parts
 
   for entry in "${DOMAINS[@]}"; do
@@ -288,6 +336,10 @@ cmd_export() {
     fi
 
     sync_snapshot "$live" "$snapshot" "$baseline" "$counts"
+
+    untracked=$(report_untracked plist "$raw" "$BASELINE_DIR/$domain.full.plist" \
+      "${keeps[@]}" ${(f)"$(ignores_for "$domain")"})
+    [[ -n "$untracked" ]] && print_step "untracked changes: $untracked"
   done
 
   for entry in "${FILES[@]}"; do
@@ -317,6 +369,10 @@ cmd_export() {
     fi
 
     sync_snapshot "$live" "$snapshot" "$baseline" "$counts"
+
+    untracked=$(report_untracked json "$live.raw.json" "$BASELINE_DIR/$name.full.json" \
+      "${keeps[@]}" ${(f)"$(ignores_for "$name")"})
+    [[ -n "$untracked" ]] && print_step "untracked changes: $untracked"
   done
 
   print_success "Export complete"
