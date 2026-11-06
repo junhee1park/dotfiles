@@ -32,8 +32,8 @@ sudo pmset -c displaysleep 30
 print_step "Start screen saver after 10 minutes of inactivity"
 defaults -currentHost write com.apple.screensaver idleTime -int 600
 
-print_step "Require password 5 seconds after screen saver or display off"
-sysadminctl -screenLock 5 -password -
+print_step "Require password immediately after screen saver or display off"
+sysadminctl -screenLock immediate -password -
 
 print_header "Hot Corners"
 print_step "Set bottom-right corner to activate screen saver"
