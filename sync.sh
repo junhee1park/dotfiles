@@ -209,6 +209,13 @@ sync_snapshot() {
     return
   fi
 
+  # Both moved to the same values, e.g. an edit made in the repo and the app.
+  if cmp -s "$live" "$snapshot"; then
+    cp "$live" "$baseline"
+    print_step "unchanged ($counts keys)"
+    return
+  fi
+
   if ! cmp -s "$snapshot" "$baseline"; then
     print_error "skipped - the snapshot and this machine both changed"
     return
