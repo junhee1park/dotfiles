@@ -3707,13 +3707,13 @@
 	In19fX1d
 	</data>
 	<key>Workspace.darkThemeID</key>
-	<string>custom-76301BBA-4BFC-4C5B-B076-690CBC6D8900</string>
+	<string>custom-DB1CADC4-BF94-41A4-8A4E-ED624A062261</string>
 	<key>Workspace.inactivePaneFadeMode</key>
 	<string>none</string>
 	<key>Workspace.showsActivePaneBorder</key>
 	<true/>
 	<key>Workspace.terminalCellHeightPercent</key>
-	<real>15.0</real>
+	<real>20.0</real>
 	<key>Workspace.terminalFallbackFontNames</key>
 	<array>
 		<string>D2Coding</string>
