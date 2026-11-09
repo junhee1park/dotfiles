@@ -2,6 +2,7 @@ Workspace.terminalFontName
 Workspace.terminalFontPointSize
 Workspace.terminalCellHeightPercent
 Workspace.terminalFallbackFontNames
+Workspace.customThemes
 Workspace.inactivePaneFadeMode
 Workspace.usesStandardInactiveWindowPaneStyles
 Workspace.showsActivePaneBorder
