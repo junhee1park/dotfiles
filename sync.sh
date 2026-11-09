@@ -534,10 +534,12 @@ cmd_review() {
   entries=(${(f)"$(jq -r 'to_entries[] | .key as $n | .value | to_entries[]
     | [$n, .key, .value.before, .value.after] | @tsv' "$PENDING")"})
 
-  local entry name key before after choice tracked=0
+  print_step "${#entries} setting(s) to review"
+
+  local entry name key before after choice tracked=0 i=0
   for entry in "${entries[@]}"; do
     IFS=$'\t' read -r name key before after <<<"$entry"
-    print_header "$name"
+    print_header "$name ($((++i))/${#entries})"
     echo "$key"
     echo "  before: $before"
     echo "  after:  $after"
