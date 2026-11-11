@@ -53,11 +53,6 @@ return {
     },
   },
   {
-    "nvim-mini/mini.bracketed",
-    version = "*",
-    opts = {},
-  },
-  {
     "nvim-mini/mini.bufremove",
     version = "*",
     opts = {},
