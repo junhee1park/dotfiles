@@ -22,7 +22,6 @@
   "mini.completion": { "branch": "main", "commit": "0aeee1231b90d70563e24facc238ab4359b8d5fc" },
   "mini.cursorword": { "branch": "main", "commit": "331bc17172e41343d39d91a4ab571d510766812e" },
   "mini.extra": { "branch": "main", "commit": "e5ecf197f8954d002cb9e85b3715851e2c8d3cd5" },
-  "mini.files": { "branch": "main", "commit": "a5689dae6b732955e33eec225b798d6815063179" },
   "mini.hipatterns": { "branch": "main", "commit": "607d604e650cdf21d71f863d040c496a1d0cb320" },
   "mini.icons": { "branch": "main", "commit": "e56797f90192d81f1fda02e662fc3e8e3d775027" },
   "mini.indentscope": { "branch": "main", "commit": "d3f955f09b1a05d25d5a7740338fba2baaee41a3" },

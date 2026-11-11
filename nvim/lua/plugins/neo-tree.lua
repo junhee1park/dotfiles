@@ -1,6 +1,7 @@
 return {
   "nvim-neo-tree/neo-tree.nvim",
   branch = "v3.x",
+  lazy = false, -- plugin/neo-tree.lua must be sourced at startup to hijack netrw
   dependencies = {
     "nvim-lua/plenary.nvim",
     "MunifTanjim/nui.nvim",
@@ -12,21 +13,12 @@ return {
     { "<leader>eg", "<Cmd>Neotree left git_status toggle<CR>", desc = "Git status" },
   },
   opts = {
-    close_if_last_window = true,
     filesystem = {
       follow_current_file = { enabled = true },
       use_libuv_file_watcher = true,
       filtered_items = {
         hide_dotfiles = false,
         hide_gitignored = false,
-      },
-    },
-    window = {
-      width = 32,
-      mappings = {
-        ["l"] = "open",
-        ["h"] = "close_node",
-        ["<space>"] = "none", -- keep leader usable inside the tree
       },
     },
   },
