@@ -98,9 +98,6 @@ map("n", "<leader>ba", "<cmd>b#<cr>", { desc = "Alternate" })
 -- lazy
 map("n", "<leader>L", "<cmd>Lazy<cr>", { desc = "Lazy" })
 
--- new file
-map("n", "<leader>fn", "<cmd>enew<cr>", { desc = "New File" })
-
 -- quickfix / location list
 map("n", "<leader>eq", function()
   vim.cmd(vim.fn.getqflist({ winid = true }).winid ~= 0 and "cclose" or "copen")

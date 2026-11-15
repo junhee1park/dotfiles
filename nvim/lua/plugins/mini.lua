@@ -169,15 +169,6 @@ return {
     version = "*",
     lazy = false,
     opts = {},
-    keys = {
-      {
-        "<leader>ot",
-        function()
-          require("mini.trailspace").trim()
-        end,
-        desc = "Trim Trailspace",
-      },
-    },
   },
   {
     "nvim-mini/mini.splitjoin",
@@ -217,9 +208,7 @@ return {
   {
     "nvim-mini/mini.visits",
     version = "*",
-    -- load on startup so visit frequency/recency tracking starts from the
-    -- very first file opened, not just after `fv`/`fV` (in mini.extra's keys,
-    -- grouped with the rest of the picker keymaps) first trigger it
+    -- Track visit frequency/recency from the first file opened.
     lazy = false,
     opts = {},
   },
@@ -279,101 +268,9 @@ return {
     },
   },
   {
-    "nvim-mini/mini.pick",
-    version = "*",
-    -- load on startup (keys would otherwise lazy-load) so setup() replaces
-    -- vim.ui.select from the very first select prompt
-    lazy = false,
-    config = function()
-      require("mini.pick").setup()
-
-      -- Terminal `cmd+v` (Ghostty) sends a bracketed paste that tmux forwards to
-      -- Neovim in chunks, so Neovim delivers it as a *streaming* paste (phase
-      -- 1/2/3). mini.pick's own vim.paste wrapper only supports non-streaming
-      -- (phase == -1) and otherwise warns "There is no streaming paste support"
-      -- (pick.lua). We wrap vim.paste *after* setup so ours runs first: while a
-      -- picker is active, read the clipboard register directly and push it into
-      -- the query, bypassing the phase check entirely. See mini.nvim#1263.
-      local paste_orig = vim.paste
-      vim.paste = function(lines, phase)
-        if not MiniPick.is_picker_active() then
-          return paste_orig(lines, phase)
-        end
-        -- A streamed paste calls this once per phase (1=start, 2=continue,
-        -- 3=end). We read the whole register ourselves, so act only on the
-        -- first call (phase 1) or a non-streamed paste (phase -1); otherwise
-        -- every phase would re-append the clipboard and duplicate it.
-        if phase ~= -1 and phase ~= 1 then
-          return true
-        end
-        for _, reg in ipairs({ "+", "*", '"' }) do
-          local content = vim.fn.getreg(reg) or ""
-          if content ~= "" then
-            -- mini.pick's query is a list of single chars, so split into
-            -- characters (not one blob) to keep backspace/caret editing working;
-            -- flatten newlines/tabs to spaces like the native paste does.
-            local chars = vim.fn.split(content:gsub("[\n\t]", " "), "\\zs")
-            local query = MiniPick.get_picker_query() or {}
-            vim.list_extend(query, chars)
-            MiniPick.set_picker_query(query)
-            return true
-          end
-        end
-        return true
-      end
-    end,
-    keys = {
-      { "<leader><leader>", "<Cmd>Pick files<CR>", desc = "Files" },
-      { "<leader>/", "<Cmd>Pick grep_live<CR>", desc = "Grep Live" },
-      { "<leader>ff", "<Cmd>Pick files<CR>", desc = "Files" },
-      {
-        -- Like `files`, but bypasses .gitignore/.ignore (-uu) so ignored
-        -- files (e.g. .env) show up. Mirrors the toggle other pickers expose.
-        "<leader>fF",
-        function()
-          local pick = require("mini.pick")
-          pick.builtin.cli({ command = { "rg", "--files", "--color=never", "-uu", "--glob=!.git/**" } }, {
-            source = {
-              name = "Files (incl. ignored)",
-              show = function(buf_id, items, query)
-                return pick.default_show(buf_id, items, query, { show_icons = true })
-              end,
-            },
-          })
-        end,
-        desc = "Files (incl. ignored)",
-      },
-      { "<leader>fg", "<Cmd>Pick grep_live<CR>", desc = "Grep Live" },
-      { "<leader>fG", '<Cmd>Pick grep pattern="<cword>"<CR>', desc = "Grep Current Word" },
-      { "<leader>fb", "<Cmd>Pick buffers<CR>", desc = "Buffers" },
-      { "<leader>fh", "<Cmd>Pick help<CR>", desc = "Help Tags" },
-      { "<leader>fr", "<Cmd>Pick resume<CR>", desc = "Resume" },
-    },
-  },
-  {
     "nvim-mini/mini.extra",
     version = "*",
     opts = {},
-    keys = {
-      { "<leader>fd", '<Cmd>Pick diagnostic scope="all"<CR>', desc = "Diagnostic Workspace" },
-      { "<leader>fD", '<Cmd>Pick diagnostic scope="current"<CR>', desc = "Diagnostic Buffer" },
-      { "<leader>fs", '<Cmd>Pick lsp scope="workspace_symbol_live"<CR>', desc = "Symbols Workspace (Live)" },
-      { "<leader>fS", '<Cmd>Pick lsp scope="document_symbol"<CR>', desc = "Symbols Document" },
-      { "<leader>fR", '<Cmd>Pick lsp scope="references"<CR>', desc = "References (LSP)" },
-      { "<leader>fa", '<Cmd>Pick git_hunks scope="staged"<CR>', desc = "Added Hunks (All)" },
-      { "<leader>fA", '<Cmd>Pick git_hunks path="%" scope="staged"<CR>', desc = "Added Hunks (Buf)" },
-      { "<leader>fm", "<Cmd>Pick git_hunks<CR>", desc = "Modified Hunks (All)" },
-      { "<leader>fM", '<Cmd>Pick git_hunks path="%"<CR>', desc = "Modified Hunks (Buf)" },
-      { "<leader>fc", "<Cmd>Pick git_commits<CR>", desc = "Commits (All)" },
-      { "<leader>fC", '<Cmd>Pick git_commits path="%"<CR>', desc = "Commits (Buf)" },
-      { "<leader>f/", '<Cmd>Pick history scope="/"<CR>', desc = '"/" History' },
-      { "<leader>f:", '<Cmd>Pick history scope=":"<CR>', desc = '":" History' },
-      { "<leader>fH", "<Cmd>Pick hl_groups<CR>", desc = "Highlight Groups" },
-      { "<leader>fl", '<Cmd>Pick buf_lines scope="all"<CR>', desc = "Lines (All)" },
-      { "<leader>fL", '<Cmd>Pick buf_lines scope="current"<CR>', desc = "Lines (Buf)" },
-      { "<leader>fv", '<Cmd>Pick visit_paths cwd=""<CR>', desc = "Visit Paths (All)" },
-      { "<leader>fV", "<Cmd>Pick visit_paths<CR>", desc = "Visit Paths (Cwd)" },
-    },
   },
   {
     "nvim-mini/mini.jump",
@@ -470,13 +367,12 @@ return {
           { mode = "n", keys = "<leader>a", desc = "+ai" },
           { mode = "n", keys = "<leader>b", desc = "+buffer" },
           { mode = "n", keys = "<leader>e", desc = "+explore" },
-          { mode = "n", keys = "<leader>f", desc = "+file" },
+          { mode = "n", keys = "<leader>f", desc = "+find" },
           { mode = "n", keys = "<leader>g", desc = "+git" },
           { mode = "n", keys = "<leader>gh", desc = "+hunk" },
           { mode = "x", keys = "<leader>g", desc = "+git" },
           { mode = "x", keys = "<leader>gh", desc = "+hunk" },
           { mode = "n", keys = "<leader>l", desc = "+language" },
-          { mode = "n", keys = "<leader>o", desc = "+other" },
           { mode = "n", keys = "<leader>s", desc = "+session" },
           { mode = "n", keys = "<leader>t", desc = "+terminal" },
           miniclue.gen_clues.square_brackets(),

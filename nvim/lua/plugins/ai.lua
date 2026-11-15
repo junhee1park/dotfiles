@@ -1,26 +1,3 @@
--- The sidekick terminal is pinned with winfixbuf, so a picker launched while it
--- is focused would target it and fail to open the file. Retarget a real window.
-vim.api.nvim_create_autocmd("User", {
-  pattern = "MiniPickStart",
-  group = vim.api.nvim_create_augroup("junheep_sidekick_pick", { clear = true }),
-  callback = function()
-    local target = MiniPick.get_picker_state().windows.target
-    if not (target and vim.api.nvim_win_is_valid(target) and vim.wo[target].winfixbuf) then
-      return
-    end
-    for _, w in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
-      if
-        w ~= target
-        and not vim.wo[w].winfixbuf
-        and vim.api.nvim_win_get_config(w).zindex == nil
-        and vim.bo[vim.api.nvim_win_get_buf(w)].buftype == ""
-      then
-        MiniPick.set_picker_target_window(w)
-        return
-      end
-    end
-  end,
-})
 local SidekickFloat = {}
 
 -- Tallest float that still leaves the tabline, the statusline/cmdline and the
