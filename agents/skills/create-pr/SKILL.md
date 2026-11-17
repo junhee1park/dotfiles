@@ -8,6 +8,17 @@ Open a pull request for the current branch with `gh pr create`, targeting the
 branch this one was cut from — `main` unless it is stacked on another branch.
 Push first if the branch has no upstream.
 
+When the work is a chain of branches that each build on the one below, open
+it as a GitHub stack with the `gh stack` extension. Do not open separate PRs
+whose bases point at each other. Create the stack with
+`gh stack init <bottom> ... <top>` and `gh stack submit`. Add PRs that are
+already open with `gh stack link <pr> ...`, listed from the bottom. After
+changing a lower branch, update the branches above it with `gh stack rebase`
+and `gh stack push`. A stack is one straight chain, so if the branches form a
+tree, say so and ask how to split them before opening anything. Each PR in
+the stack still gets its own title and body by the rules below; set them with
+`gh pr edit` when `submit` fills them in.
+
 Take the scope from the full diff against the base branch — the PR covers the
 whole branch, including commits made before this session or by someone else.
 
