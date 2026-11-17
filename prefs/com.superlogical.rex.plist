@@ -3717,7 +3717,7 @@
 		<string>D2Coding</string>
 	</array>
 	<key>Workspace.terminalFontName</key>
-	<string>CaskaydiaMono Nerd Font Mono</string>
+	<string>CaskaydiaMono Nerd Font</string>
 	<key>Workspace.terminalFontPointSize</key>
 	<real>14.0</real>
 	<key>Workspace.usesStandardInactiveWindowPaneStyles</key>
