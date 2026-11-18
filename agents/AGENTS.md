@@ -37,7 +37,7 @@ Example shape (I wrote in English):
 Example shape (I wrote in Korean):
 
 ```
-<your answer to my request, in Korean>
+<your normal answer to my request>
 
 ---\n
 📝 English
