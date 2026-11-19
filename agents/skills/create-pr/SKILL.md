@@ -56,9 +56,9 @@ checklist unless the user asks for one.
 Never link the Linear issue. The branch name already carries the issue
 identifier, which is what links the two and closes the issue on merge.
 
-When the diff touches the UI, judge whether screenshots would help the
-reviewer. If so, capture them by running the app when that is possible;
-when it isn't, create the PR without them and note that screenshots can
+When the diff changes anything a user sees, always attach screenshots of
+the changed screens, captured by running the app. When the app cannot be
+run, create the PR without them and say in the body that screenshots will
 be added later. Don't block PR creation waiting on screenshots.
 
 Attach images with the `gh image` extension when it is installed. The markdown
