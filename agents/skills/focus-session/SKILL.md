@@ -84,13 +84,8 @@ When the change is complete:
    missing or wrong, citing files and lines. Do not skip this, even for a
    small change.
 2. Write one line on what comes next.
-3. List, as facts, where this session lacked something an agent needed: what
-   the user corrected or pointed out, questions an instruction or doc would
-   have answered, and checks you could not run yourself. Ask which to fix now
-   with an instruction, a doc, or a check, and apply only those.
-4. If any gaps were listed, write them to a new file in the same place and
-   format as a delegate session record, with `Session: focus`, only the
-   `Gaps` section, and the fixed ones marked `(fixed)`.
+3. Wrap up as the wrap-up-session instructions describe, with `Session:
+   focus`.
 
 Review approval does not authorize staging, committing, or pushing. Follow the
 user's separate instructions for those.
