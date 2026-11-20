@@ -61,6 +61,18 @@ the changed screens, captured by running the app. When the app cannot be
 run, create the PR without them and say in the body that screenshots will
 be added later. Don't block PR creation waiting on screenshots.
 
+Show each changed screen as a before and after pair: the base branch on the
+left, this branch on the right, in a two-column table headed Before and After.
+A reviewer judges a UI change by comparing it, and a lone after shot hides what
+it replaced. Capture the before from the base branch under the same data and
+theme, which is easiest before the first edit. A screen that did not exist
+before gets an after alone.
+
+When the change moves (an animation, a hover, a transition, a flow over several
+steps), attach a GIF recorded from the app as well, since a still cannot show
+it. Record with `agent-browser record`, crop to the part that changes, and
+convert with ffmpeg.
+
 Attach images with the `gh image` extension when it is installed. The markdown
 it prints renders at the full width of the body; when that is too large, size
 the image with an `<img width>` tag instead.
