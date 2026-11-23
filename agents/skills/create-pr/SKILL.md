@@ -19,6 +19,12 @@ tree, say so and ask how to split them before opening anything. Each PR in
 the stack still gets its own title and body by the rules below; set them with
 `gh pr edit` when `submit` fills them in.
 
+The `gh stack` extension is new and changes often, so read its full help
+(`gh stack --help`, then `gh stack <command> --help`, never truncated) before
+any stack operation, including merging and recovering from a merged or
+deleted base. Use its own commands over `gh pr` or the REST API, which refuse
+or bypass stacked PRs.
+
 Take the scope from the full diff against the base branch — the PR covers the
 whole branch, including commits made before this session or by someone else.
 
