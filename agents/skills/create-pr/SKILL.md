@@ -56,10 +56,11 @@ checklist unless the user asks for one.
 Never link the Linear issue. The branch name already carries the issue
 identifier, which is what links the two and closes the issue on merge.
 
-When the diff changes anything a user sees, always attach screenshots of
-the changed screens, captured by running the app. When the app cannot be
-run, create the PR without them and say in the body that screenshots will
-be added later. Don't block PR creation waiting on screenshots.
+When the diff changes anything a user sees, follow the project's guidance
+on showing it in the PR: whether to attach screenshots or recordings, and
+how to run the app to capture them. If you tried and could not do what it
+asks, ask the user how to proceed before opening the PR. Say what you
+tried and what stopped you.
 
 Show each changed screen as a before and after pair: the base branch on the
 left, this branch on the right, in a two-column table headed Before and After.
