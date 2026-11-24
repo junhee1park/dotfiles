@@ -1,6 +1,0 @@
-# Search hidden files (dotfiles) but skip .git internals
---hidden
---glob=!.git/*
-
-# Case-insensitive unless the pattern has an uppercase letter
---smart-case
