@@ -109,11 +109,6 @@ return {
     opts = {},
   },
   {
-    "nvim-mini/mini.input",
-    version = "*",
-    opts = {},
-  },
-  {
     -- only gen_ai_spec.buffer() is used: the `B` (whole buffer) textobject in mini.ai above
     "nvim-mini/mini.extra",
     version = "*",

@@ -69,7 +69,12 @@ return {
     opts = {
       bigfile = { enabled = true },
       notifier = { enabled = true },
-      styles = { notification = { wo = { winblend = 0 } } },
+      input = { enabled = true, icon = "" },
+      styles = {
+        notification = { wo = { winblend = 0 } },
+        -- under the cursor, like the code action picker (telescope get_cursor)
+        input = { relative = "cursor", row = 1, col = 0, width = 40, title_pos = "left" },
+      },
       image = { enabled = true },
       quickfile = { enabled = true },
       words = { enabled = true },
