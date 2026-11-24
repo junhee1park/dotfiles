@@ -16,7 +16,16 @@ return {
       "nvim-telescope/telescope-fzf-native.nvim",
       build = "make",
     },
+    "nvim-telescope/telescope-ui-select.nvim",
   },
+  init = function()
+    -- telescope is lazy-loaded; load it on the first vim.ui.select call
+    ---@diagnostic disable-next-line: duplicate-set-field
+    vim.ui.select = function(...)
+      require("lazy").load({ plugins = { "telescope.nvim" } })
+      return vim.ui.select(...)
+    end
+  end,
   keys = {
     { "<leader><leader>", files, desc = "Files" },
     { "<leader>/", grep, desc = "Grep Live" },
@@ -26,6 +35,9 @@ return {
     { "<leader>fh", "<Cmd>Telescope help_tags<CR>", desc = "Help Tags" },
     { "<leader>fr", "<Cmd>Telescope oldfiles<CR>", desc = "Recent Files" },
     { "<leader>fl", "<Cmd>Telescope resume<CR>", desc = "Last Picker" },
+    { "grr", "<Cmd>Telescope lsp_references<CR>", desc = "References" },
+    { "gri", "<Cmd>Telescope lsp_implementations<CR>", desc = "Implementation" },
+    { "grt", "<Cmd>Telescope lsp_type_definitions<CR>", desc = "Type Definition" },
   },
   config = function()
     require("telescope").setup({
@@ -41,7 +53,11 @@ return {
           },
         },
       },
+      extensions = {
+        ["ui-select"] = { require("telescope.themes").get_cursor() },
+      },
     })
     require("telescope").load_extension("fzf")
+    require("telescope").load_extension("ui-select")
   end,
 }
