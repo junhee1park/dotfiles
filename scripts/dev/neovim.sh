@@ -10,7 +10,7 @@ mkdir -p $HOME/.config
 rm -rf $HOME/.config/nvim
 ln -sf "$DOTFILES_DIR/nvim" "$HOME/.config/nvim"
 
-print_step "Install ripgrep for mini.pick and :grep"
+print_step "Install ripgrep for Telescope and :grep"
 brew install ripgrep
 
 print_step "Install tree-sitter-cli for nvim-treesitter parser builds"

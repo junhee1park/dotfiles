@@ -93,8 +93,7 @@ local function apply_theme()
     vim.cmd("syntax reset")
   end
   vim.o.background = "dark"
-  -- load the (lazy) plugin that provides this colorscheme, then apply it
-  require("lazy.core.loader").colorscheme(name)
+  -- lazy.nvim loads the theme plugin itself on ColorSchemePre
   pcall(vim.cmd.colorscheme, name)
 end
 
@@ -134,7 +133,9 @@ return {
     config = function()
       -- keep diff colors in sync with any colorscheme change (startup, switch,
       -- or manual :colorscheme)
+      local group = vim.api.nvim_create_augroup("theme_manager", { clear = true })
       vim.api.nvim_create_autocmd("ColorScheme", {
+        group = group,
         callback = function()
           apply_git_diff_colors()
           apply_gitsigns_inline_colors()
@@ -143,6 +144,7 @@ return {
       })
       apply_theme()
       vim.api.nvim_create_autocmd("User", {
+        group = group,
         pattern = "LazyReload",
         callback = function()
           vim.schedule(function()

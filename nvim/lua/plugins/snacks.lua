@@ -23,8 +23,6 @@ local function term_nav(dir)
   end
 end
 
--- Same terminal as <leader>tt/tT: the id ignores window opts, so this toggles
--- whichever shell terminal is already running.
 local function toggle_term()
   require("snacks").terminal(nil, { win = { position = "bottom" } })
 end
@@ -50,11 +48,74 @@ return {
     "folke/snacks.nvim",
     lazy = false,
     priority = 1000,
+    init = function()
+      -- snacks.notifier has no LSP progress of its own; "Simple LSP Progress"
+      -- recipe from snacks.nvim docs/notifier.md
+      vim.api.nvim_create_autocmd("LspProgress", {
+        ---@param ev {data: {client_id: integer, params: lsp.ProgressParams}}
+        callback = function(ev)
+          local spinner = { "⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏" }
+          vim.notify(vim.lsp.status(), "info", {
+            id = "lsp_progress",
+            title = "LSP Progress",
+            opts = function(notif)
+              notif.icon = ev.data.params.value.kind == "end" and " "
+                or spinner[math.floor(vim.uv.hrtime() / (1e6 * 80)) % #spinner + 1]
+            end,
+          })
+        end,
+      })
+    end,
     opts = {
-      nes = { enable = false },
       bigfile = { enabled = true },
+      notifier = { enabled = true },
+      styles = { notification = { wo = { winblend = 0 } } },
       image = { enabled = true },
       quickfile = { enabled = true },
+      words = { enabled = true },
+      -- only the current scope, like mini.indentscope
+      indent = {
+        enabled = true,
+        indent = { enabled = false },
+        scope = { char = "▏", hl = "Comment" },
+        animate = { enabled = false },
+      },
+      dashboard = {
+        enabled = true,
+        -- same files/grep as <leader>ff / <leader>fg (dotfiles, <M-h>/<M-i>)
+        preset = {
+          pick = function(cmd, opts)
+            if cmd == "files" or cmd == "live_grep" then
+              require("search").search(cmd == "files" and "find_files" or cmd, opts)
+            else
+              require("telescope.builtin")[cmd](opts)
+            end
+          end,
+        },
+        -- the docs' `advanced` example minus its colorscript pane; pane 2
+        -- folds under pane 1 when the window is too narrow for both
+        sections = {
+          { section = "header" },
+          { section = "keys", gap = 1, padding = 1 },
+          { pane = 2, icon = " ", title = "Recent Files", section = "recent_files", indent = 2, padding = 1 },
+          { pane = 2, icon = " ", title = "Projects", section = "projects", indent = 2, padding = 1 },
+          {
+            pane = 2,
+            icon = " ",
+            title = "Git Status",
+            section = "terminal",
+            enabled = function()
+              return require("snacks").git.get_root() ~= nil
+            end,
+            cmd = "git status --short --branch --renames",
+            height = 5,
+            padding = 1,
+            ttl = 5 * 60,
+            indent = 3,
+          },
+          { section = "startup" },
+        },
+      },
       -- gutter layout: [mark/sign] [number] [fold/git]; closed-fold icons come
       -- from fillchars foldclose (options.lua)
       statuscolumn = { enabled = true },
@@ -95,6 +156,46 @@ return {
     },
     keys = {
       {
+        "<leader>n",
+        function()
+          require("snacks").notifier.show_history()
+        end,
+        desc = "Notifications",
+      },
+      {
+        "<leader>bd",
+        function()
+          require("snacks").bufdelete()
+        end,
+        desc = "Delete",
+      },
+      {
+        "<leader>bD",
+        function()
+          require("snacks").bufdelete({ force = true })
+        end,
+        desc = "Delete!",
+      },
+      {
+        "<leader>bo",
+        function()
+          require("snacks").bufdelete.other()
+        end,
+        desc = "Delete Other Buffers",
+      },
+      {
+        "<leader>bs",
+        function()
+          local buf = vim.api.nvim_create_buf(true, true)
+          vim.api.nvim_win_set_buf(0, buf)
+          -- Delete the buffer instead of closing the only window.
+          vim.keymap.set("n", "q", function()
+            require("snacks").bufdelete(buf)
+          end, { buffer = buf, desc = "Close Scratch Buffer" })
+        end,
+        desc = "Scratch",
+      },
+      {
         "<leader>gg",
         function()
           require("snacks").lazygit()
@@ -118,20 +219,6 @@ return {
       -- sidekick <c-.> toggle.
       { "<c-/>", toggle_term, desc = "Toggle Terminal", mode = { "n", "t", "i" } },
       { "<c-_>", toggle_term, desc = "Toggle Terminal", mode = { "n", "t", "i" } },
-      {
-        "<leader>tt",
-        function()
-          require("snacks").terminal(nil, { win = { position = "right" } })
-        end,
-        desc = "Terminal (Vertical)",
-      },
-      {
-        "<leader>tT",
-        function()
-          require("snacks").terminal(nil, { win = { position = "bottom" } })
-        end,
-        desc = "Terminal (Horizontal)",
-      },
     },
   },
 }

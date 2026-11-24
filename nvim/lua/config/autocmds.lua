@@ -91,30 +91,6 @@ vim.api.nvim_create_autocmd("BufWritePre", {
   end,
 })
 
--- disable mini.indentscope / mini.cursorword in non-file buffers (terminal, help,
--- starter, sidekick, …) — they're read-only UI, so both are just noise there
--- TermOpen is needed for terminals: at BufWinEnter their buftype is still ""
-vim.api.nvim_create_autocmd({ "BufWinEnter", "TermOpen" }, {
-  group = augroup("no_special_buffer_ui"),
-  callback = function(ev)
-    if vim.bo[ev.buf].buftype ~= "" then
-      vim.b[ev.buf].miniindentscope_disable = true
-      vim.b[ev.buf].minicursorword_disable = true
-    end
-  end,
-})
-
--- disable mini.cursorword in prose, where common words would be underlined
--- constantly. Kept separate from the wrap/spell autocmds above: those two are
--- split only because of `spell`, which cursorword has nothing to do with.
-vim.api.nvim_create_autocmd("FileType", {
-  group = augroup("no_cursorword"),
-  pattern = { "markdown", "text", "plaintex", "typst", "gitcommit" },
-  callback = function(ev)
-    vim.b[ev.buf].minicursorword_disable = true
-  end,
-})
-
 -- close some filetypes with <q>
 vim.api.nvim_create_autocmd("FileType", {
   group = augroup("close_with_q"),

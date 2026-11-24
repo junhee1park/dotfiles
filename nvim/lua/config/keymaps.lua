@@ -41,16 +41,33 @@ end, { desc = "Only (keep floats/terminals)" })
 -- clear search with <esc>
 map({ "i", "n", "s" }, "<esc>", function()
   vim.cmd("noh")
+  -- :noh from a mapping isn't seen by hlslens; stop it so its position cache resets
+  -- and the next n/N/* re-sends search marks to the scrollbar
+  if package.loaded["hlslens"] then
+    vim.schedule(function()
+      require("hlslens").stop()
+      require("scrollbar.handlers.search").handler.hide()
+    end)
+  end
   return "<esc>"
 end, { expr = true, desc = "Escape and Clear hlsearch" })
 
 -- saner n/N: always search the same direction + center
-map("n", "n", "'Nn'[v:searchforward].'zv'", { expr = true, desc = "Next Search Result" })
+-- <Cmd>…start() refreshes nvim-hlslens (search lens + scrollbar search marks) after the jump;
+-- n/N are Lua functions because a <Cmd> in a string expr mapping's result never runs
+local hlslens_start = '<Cmd>lua require("hlslens").start()<CR>'
+map("n", "n", function()
+  return (vim.v.searchforward == 1 and "n" or "N") .. "zv" .. hlslens_start
+end, { expr = true, desc = "Next Search Result" })
 map("x", "n", "'Nn'[v:searchforward]", { expr = true, desc = "Next Search Result" })
 map("o", "n", "'Nn'[v:searchforward]", { expr = true, desc = "Next Search Result" })
-map("n", "N", "'nN'[v:searchforward].'zv'", { expr = true, desc = "Prev Search Result" })
+map("n", "N", function()
+  return (vim.v.searchforward == 1 and "N" or "n") .. "zv" .. hlslens_start
+end, { expr = true, desc = "Prev Search Result" })
 map("x", "N", "'nN'[v:searchforward]", { expr = true, desc = "Prev Search Result" })
 map("o", "N", "'nN'[v:searchforward]", { expr = true, desc = "Prev Search Result" })
+map("n", "*", "*" .. hlslens_start, { desc = "Search Word Forward" })
+map("n", "#", "#" .. hlslens_start, { desc = "Search Word Backward" })
 
 -- add undo break-points
 map("i", ",", ",<c-g>u")
@@ -62,27 +79,22 @@ map("x", "<", "<gv")
 map("x", ">", ">gv")
 
 -- move cursor like arrow keys in Insert/Command/Terminal mode, e.g. to step
--- outside an auto-inserted pair from mini.pairs
+-- outside an auto-inserted pair
 map("c", "<M-h>", "<Left>", { silent = false, desc = "Left" })
 map("c", "<M-l>", "<Right>", { silent = false, desc = "Right" })
 map("i", "<M-h>", "<Left>", { remap = true, desc = "Left" })
-map("i", "<M-j>", "<Down>", { remap = true, desc = "Down" })
-map("i", "<M-k>", "<Up>", { remap = true, desc = "Up" })
 map("i", "<M-l>", "<Right>", { remap = true, desc = "Right" })
 map("t", "<M-h>", "<Left>", { desc = "Left" })
 map("t", "<M-j>", "<Down>", { desc = "Down" })
 map("t", "<M-k>", "<Up>", { desc = "Up" })
 map("t", "<M-l>", "<Right>", { desc = "Right" })
 
--- smart <Tab>: snippet tabstop → sidekick NES → Copilot accept → literal Tab.
--- Not tied to any one plugin; the require()s are deferred to press time, so
--- lazy.nvim loads sidekick/copilot on first use (dependency-free at definition).
+-- smart <Tab>: snippet tabstop → Copilot accept → literal Tab.
+-- The require() is deferred to press time, so lazy.nvim loads copilot on first
+-- use (dependency-free at definition).
 map({ "i", "n" }, "<Tab>", function()
   if vim.snippet.active({ direction = 1 }) then
     vim.snippet.jump(1)
-    return ""
-  end
-  if require("sidekick").nes_jump_or_apply() then
     return ""
   end
   if require("copilot.suggestion").is_visible() then
@@ -95,19 +107,10 @@ end, { expr = true, desc = "Smart Tab" })
 -- switch to last (alternate) buffer
 map("n", "<leader>ba", "<cmd>b#<cr>", { desc = "Alternate" })
 
--- lazy
-map("n", "<leader>L", "<cmd>Lazy<cr>", { desc = "Lazy" })
-
--- new file
-map("n", "<leader>fn", "<cmd>enew<cr>", { desc = "New File" })
-
--- quickfix / location list
-map("n", "<leader>eq", function()
+-- quickfix
+map("n", "<leader>q", function()
   vim.cmd(vim.fn.getqflist({ winid = true }).winid ~= 0 and "cclose" or "copen")
 end, { desc = "Quickfix" })
-map("n", "<leader>eQ", function()
-  vim.cmd(vim.fn.getloclist(0, { winid = true }).winid ~= 0 and "lclose" or "lopen")
-end, { desc = "Locations" })
 
 -- diagnostics
 local diagnostic_goto = function(next, severity)
@@ -119,11 +122,12 @@ local diagnostic_goto = function(next, severity)
     })
   end
 end
-map("n", "<leader>ld", vim.diagnostic.open_float, { desc = "Diagnostic Popup" })
 map("n", "]e", diagnostic_goto(true, "ERROR"), { desc = "Next Error" })
 map("n", "[e", diagnostic_goto(false, "ERROR"), { desc = "Prev Error" })
 map("n", "]w", diagnostic_goto(true, "WARN"), { desc = "Next Warning" })
 map("n", "[w", diagnostic_goto(false, "WARN"), { desc = "Prev Warning" })
+-- Alias of the default <C-w>d; under <C-w> it shadows which-key's <C-d> scroll
+pcall(vim.keymap.del, "n", "<C-w><C-d>")
 
 -- \-prefixed option toggles, echoing the new value
 local function toggle_local(option)

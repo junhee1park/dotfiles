@@ -5,7 +5,7 @@ return {
     lazy = false,
     keys = {
       {
-        "<leader>lf",
+        "<leader>bf",
         function()
           require("conform").format()
         end,
@@ -28,6 +28,7 @@ return {
       end,
     },
     init = function()
+      -- Route gq through conform so it formats like <leader>bf
       vim.o.formatexpr = "v:lua.require'conform'.formatexpr()"
     end,
   },

@@ -8,7 +8,7 @@ return {
   },
   {
     "nvim-treesitter/nvim-treesitter",
-    branch = "main", -- the rewrite (frozen); classic API lives on master
+    branch = "main", -- the rewrite; the classic API lives on master, which is locked
     lazy = false, -- per README: this plugin does not support lazy-loading
     build = ":TSUpdate", -- rebuild parsers to versions the plugin expects on install/update
     -- merge (not override) ensure_installed across lang/*.lua fragments
