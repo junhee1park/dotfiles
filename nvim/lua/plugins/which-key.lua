@@ -35,44 +35,6 @@ local function textobjects()
   return spec
 end
 
--- One "Prev/Next X" (lowercase key) and "First/Last X" (uppercase) style for
--- the `[`/`]` pairs, replacing the built-in `:bnext`-style descs and
--- which-key's lowercase preset ones.
-local function brackets()
-  local spec = {}
-  local function pair(key, name, prev, next, mode)
-    spec[#spec + 1] = { "[" .. key, desc = prev .. " " .. name, mode = mode }
-    spec[#spec + 1] = { "]" .. key, desc = next .. " " .. name, mode = mode }
-  end
-  for _, item in ipairs({
-    { "b", "B", "Buffer" },
-    { "q", "Q", "Quickfix" },
-    { "l", "L", "Loclist" },
-    { "a", "A", "Arg" },
-    { "t", "T", "Tag" },
-    { "d", "D", "Diagnostic" },
-  }) do
-    pair(item[1], item[3], "Prev", "Next", "n")
-    pair(item[2], item[3], "First", "Last", "n")
-  end
-  pair("<C-Q>", "Quickfix File", "Prev", "Next", "n")
-  pair("<C-L>", "Loclist File", "Prev", "Next", "n")
-  pair("<C-T>", "Preview Tag", "Prev", "Next", "n")
-  spec[#spec + 1] = { "[<Space>", desc = "Blank Line Above" }
-  spec[#spec + 1] = { "]<Space>", desc = "Blank Line Below" }
-  local motions = { "n", "x", "o" }
-  pair("m", "Method Start", "Prev", "Next", motions)
-  pair("M", "Method End", "Prev", "Next", motions)
-  pair("s", "Misspelled Word", "Prev", "Next", motions)
-  pair("%", "Unmatched Group", "Prev", "Next", motions)
-  pair("(", "Unmatched (", "Prev", "Next", motions)
-  pair("{", "Unmatched {", "Prev", "Next", motions)
-  pair("<", "Unmatched <", "Prev", "Next", motions)
-  pair("n", "Node", "Select Prev", "Select Next", "x")
-  pair("N", "Sibling Node", "Select Prev", "Select Next", "x")
-  return spec
-end
-
 return {
   "folke/which-key.nvim",
   event = "VeryLazy",
@@ -95,7 +57,6 @@ return {
       { "gra", desc = "Code Action", mode = { "n", "x" } },
       { "grx", desc = "Run Codelens" },
       { "gO", desc = "Document Symbols" },
-      brackets(),
       textobjects(),
     },
   },
