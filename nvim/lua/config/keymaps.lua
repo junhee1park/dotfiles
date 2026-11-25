@@ -114,6 +114,13 @@ end, { desc = "Quickfix" })
 map("n", "<leader>qf", function()
   vim.cmd(vim.bo.filetype == "qf" and "wincmd p" or "copen")
 end, { desc = "Quickfix (focus)" })
+map("n", "<leader>ql", function()
+  -- :lopen errors with E776 when the window has no location list
+  local ok, err = pcall(vim.cmd, vim.fn.getloclist(0, { winid = true }).winid ~= 0 and "lclose" or "lopen")
+  if not ok and err then
+    vim.notify(err:match("E%d+:.*") or err, vim.log.levels.ERROR)
+  end
+end, { desc = "Location List" })
 
 -- diagnostics
 local diagnostic_goto = function(next, severity)
