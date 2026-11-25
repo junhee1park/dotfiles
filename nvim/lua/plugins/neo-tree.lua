@@ -12,6 +12,17 @@ return {
     { "<leader>eE", "<Cmd>Neotree reveal<CR>", desc = "Neo-tree (reveal file)" },
   },
   opts = {
+    -- same split keys as Telescope and quickfix; quick_jump gives up <C-s>
+    window = {
+      mappings = {
+        ["<C-s>"] = "open_split",
+        ["<C-v>"] = "open_vsplit",
+        ["<C-t>"] = "open_tabnew",
+        ["S"] = "none",
+        ["s"] = "none",
+        ["t"] = "none",
+      },
+    },
     filesystem = {
       follow_current_file = { enabled = true },
       use_libuv_file_watcher = true,

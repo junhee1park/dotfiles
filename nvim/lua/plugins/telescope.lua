@@ -48,8 +48,15 @@ return {
         -- history is saved by default but has no keys of its own
         mappings = {
           i = {
+            -- same split keys as neo-tree and quickfix
+            ["<C-s>"] = require("telescope.actions").select_horizontal,
+            ["<C-x>"] = false,
             ["<C-Down>"] = require("telescope.actions").cycle_history_next,
             ["<C-Up>"] = require("telescope.actions").cycle_history_prev,
+          },
+          n = {
+            ["<C-s>"] = require("telescope.actions").select_horizontal,
+            ["<C-x>"] = false,
           },
         },
       },

@@ -107,6 +107,27 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
+-- open the entry under the cursor in a split/vsplit/tab, the same <C-s>/<C-v>/<C-t>
+-- as Telescope and neo-tree (built-in only has <C-w><CR>, horizontal)
+vim.api.nvim_create_autocmd("FileType", {
+  group = augroup("qf_split"),
+  pattern = "qf",
+  callback = function(event)
+    local function open(split)
+      return function()
+        local idx = vim.fn.line(".")
+        local cmd = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1].loclist == 1 and "ll" or "cc"
+        vim.cmd("wincmd p")
+        vim.cmd(split)
+        vim.cmd(cmd .. " " .. idx)
+      end
+    end
+    for lhs, split in pairs({ ["<C-s>"] = "split", ["<C-v>"] = "vsplit", ["<C-t>"] = "tab split" }) do
+      vim.keymap.set("n", lhs, open(split), { buffer = event.buf, desc = "Open in " .. split })
+    end
+  end,
+})
+
 -- close mini.git scratch splits with <q>: :Git diff/log/show, show_at_cursor
 -- (commit-show / range-history), AND show_diff_source. All are named minigit://…
 -- but their filetype varies (git/diff, or the source file's type like lua for
