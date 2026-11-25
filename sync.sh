@@ -8,19 +8,12 @@
 DOTFILES_DIR="${0:A:h}"
 source "$DOTFILES_DIR/scripts/utils.sh"
 
-# launchd starts the daily export with only the system PATH, which leaves out
-# Homebrew tools such as dasel and terminal-notifier.
-[[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
-
 PREFS_DIR="$DOTFILES_DIR/prefs"
 # The snapshot as of the last successful export or import. It is what tells a
 # local edit apart from a snapshot that arrived newer via git, so it stays out
 # of the repo - every machine has its own. The path predates the rename to
 # sync.sh and is kept so existing baselines stay valid.
 BASELINE_DIR="$HOME/Library/Application Support/dotfiles/prefs"
-AGENT_LABEL="com.junhee.dotfiles.sync-export"
-AGENT_PLIST="$HOME/Library/LaunchAgents/$AGENT_LABEL.plist"
-LEGACY_AGENT_LABEL="com.junhee.dotfiles.prefs-export"
 
 # <defaults domain>:<process name to quit before importing>[:<app name to
 # reopen, when it differs from the process name>]
@@ -28,7 +21,7 @@ DOMAINS=(
   "com.knollsoft.Rectangle:Rectangle"
   "pl.maketheweb.cleanshotx:CleanShot X"
   "com.lwouis.alt-tab-macos:AltTab"
-  "com.superlogical.rex:Rex:Rex Beta"
+  "com.superlogical.rex:Rex"
 )
 
 # <name>:<toml|json>:<config the app owns>:<snapshot, relative to the repo>
@@ -49,13 +42,6 @@ SECRETS=(
 # its own default.
 keeps_for() {
   read_keys "$PREFS_DIR/keys/$1.track"
-}
-
-# Keys that change on their own and would otherwise be reported as untracked
-# changes on every export. They are never synced either way.
-ignores_for() {
-  read_keys "$PREFS_DIR/keys/common.ignore"
-  read_keys "$PREFS_DIR/keys/$1.ignore"
 }
 
 read_keys() {
@@ -226,83 +212,6 @@ sync_snapshot() {
   print_step "updated ($counts keys)"
 }
 
-# Changed settings outside both lists wait here for ./sync.sh review, as
-# {name: {key: {"before": ..., "after": ...}}}. It is per machine, like the
-# baselines.
-PENDING="$BASELINE_DIR/pending.json"
-
-# Queues the keys outside the allowlist and the ignore list that changed since
-# the last export, so a setting changed in the app's UI isn't silently left
-# behind, and prints them. Keys a list now covers leave the queue. The full
-# copy it compares against stays in the baseline directory, out of the repo.
-report_untracked() {
-  local kind="$1" name="$2" full="$3" previous="$4"
-  shift 4
-
-  if [[ -f "$previous" ]]; then
-    python3 - "$kind" "$name" "$full" "$previous" "$PENDING" "$@" <<'PY'
-import fnmatch, json, os, plistlib, sys
-
-kind, name, now_path, prev_path, pending_path = sys.argv[1:6]
-patterns = sys.argv[6:]
-
-def load(path):
-    with open(path, "rb") as f:
-        return plistlib.load(f) if kind == "plist" else json.load(f)
-
-# Plist keys are flat and may contain dots, but a file's allowlist names dotted
-# paths, so there a top-level key counts as listed when a path starts in it.
-def listed(key):
-    if kind == "plist":
-        return any(fnmatch.fnmatch(key, p) for p in patterns)
-    return any(fnmatch.fnmatch(key, p.split(".")[0]) for p in patterns)
-
-def show(value):
-    if value is None:
-        return "(unset)"
-    if isinstance(value, bytes):
-        return f"<{len(value)} bytes>"
-    text = json.dumps(value, ensure_ascii=False, default=str)
-    return text if len(text) <= 120 else text[:117] + "..."
-
-now, prev = load(now_path), load(prev_path)
-changed = sorted(k for k in now.keys() | prev.keys()
-                 if not listed(k) and now.get(k) != prev.get(k))
-
-pending = {}
-if os.path.exists(pending_path):
-    with open(pending_path) as f:
-        pending = json.load(f)
-
-queue = {k: v for k, v in pending.get(name, {}).items() if not listed(k)}
-for key in changed:
-    before = queue[key]["before"] if key in queue else show(prev.get(key))
-    after = show(now.get(key))
-    # A setting changed back to where it was has nothing left to review.
-    if before == after:
-        queue.pop(key, None)
-    else:
-        queue[key] = {"before": before, "after": after}
-
-if queue:
-    pending[name] = queue
-else:
-    pending.pop(name, None)
-with open(pending_path, "w") as f:
-    json.dump(pending, f, indent=2, ensure_ascii=False, sort_keys=True)
-
-if changed:
-    print(", ".join(changed))
-PY
-  fi
-  cp "$full" "$previous"
-}
-
-pending_count() {
-  [[ -f "$PENDING" ]] || { echo 0; return; }
-  jq '[.[] | keys[]] | length' "$PENDING"
-}
-
 cmd_export() {
   print_section "Export settings"
   mkdir -p "$PREFS_DIR" "$BASELINE_DIR"
@@ -311,7 +220,7 @@ cmd_export() {
   tmp=$(mktemp -d)
   trap "rm -rf '$tmp'" EXIT
 
-  local entry domain name format config snapshot baseline raw live counts untracked
+  local entry domain name format config snapshot baseline raw live counts
   local -a keeps parts
 
   for entry in "${DOMAINS[@]}"; do
@@ -339,10 +248,6 @@ cmd_export() {
     fi
 
     sync_snapshot "$live" "$snapshot" "$baseline" "$counts"
-
-    untracked=$(report_untracked plist "$domain" "$raw" "$BASELINE_DIR/$domain.full.plist" \
-      "${keeps[@]}" ${(f)"$(ignores_for "$domain")"})
-    [[ -n "$untracked" ]] && print_step "untracked changes: $untracked"
   done
 
   for entry in "${FILES[@]}"; do
@@ -372,21 +277,9 @@ cmd_export() {
     fi
 
     sync_snapshot "$live" "$snapshot" "$baseline" "$counts"
-
-    untracked=$(report_untracked json "$name" "$live.raw.json" "$BASELINE_DIR/$name.full.json" \
-      "${keeps[@]}" ${(f)"$(ignores_for "$name")"})
-    [[ -n "$untracked" ]] && print_step "untracked changes: $untracked"
   done
 
   print_success "Export complete"
-
-  local count
-  count=$(pending_count)
-  if (( count > 0 )); then
-    print_step "$count changed setting(s) to review - run ./sync.sh review"
-    # The daily agent has no terminal to print to.
-    [[ -t 1 ]] || notify_review "$count"
-  fi
 }
 
 cmd_import() {
@@ -487,133 +380,120 @@ cmd_import() {
   print_success "Import complete"
 }
 
-# Clicking the notification opens the review in a terminal. A login shell gives
-# the click the same PATH as a terminal, which reaches rex.
-notify_review() {
-  local message="$1 changed setting(s) to review"
-  if command -v terminal-notifier &>/dev/null; then
-    # With -execute it stays until the notification is clicked or dismissed.
-    terminal-notifier -title "dotfiles sync" -message "$message" \
-      -execute "/bin/zsh -lc '$DOTFILES_DIR/sync.sh open-review'" &>/dev/null &!
-  else
-    osascript -e "display notification \"$message - run ./sync.sh review\" with title \"dotfiles sync\""
-  fi
-}
+# Settings outside the allowlists are compared against a full copy of each
+# app's settings, kept per machine next to the baselines. Only --accept moves
+# that copy, so changes pile up until they have been reviewed and none slip by
+# between reviews.
+cmd_changes() {
+  local accept="$1"
 
-# Rex when it is running, Ghostty otherwise. Both keep the terminal open after
-# the review so its result stays readable.
-cmd_open_review() {
-  # Rex puts its CLI on PATH only inside its own panes.
-  local rex="$HOME/Library/Application Support/com.superlogical.rex/RexServer/Versions/Current/Rex Server.app/Contents/MacOS/rex"
+  local tmp
+  tmp=$(mktemp -d)
+  trap "rm -rf '$tmp'" EXIT
+  mkdir -p "$BASELINE_DIR"
 
-  if pgrep -xq Rex; then
-    "$rex" run --keep-open -c "$DOTFILES_DIR" -- "$DOTFILES_DIR/sync.sh" review &&
-      open -a "Rex Beta"
-  else
-    open -na Ghostty --args --working-directory="$DOTFILES_DIR" \
-      --wait-after-command=true -e "$DOTFILES_DIR/sync.sh" review
-  fi
-}
-
-# Walks through the queued settings one by one: track a key to sync it, ignore
-# it to never ask again, or skip it until next time. Tracking exports again so
-# the snapshot picks the key up; committing stays manual.
-cmd_review() {
-  print_section "Review changed settings"
-
-  if (( $(pending_count) == 0 )); then
-    print_success "Nothing to review"
-    return
-  fi
-  if ! command -v gum &>/dev/null; then
-    print_error "gum is required - brew install gum"
-    return 1
-  fi
-
-  local -a entries
-  entries=(${(f)"$(jq -r 'to_entries[] | .key as $n | .value | to_entries[]
-    | [$n, .key, .value.before, .value.after] | @tsv' "$PENDING")"})
-
-  print_step "${#entries} setting(s) to review"
-
-  local entry name key before after choice tracked=0 i=0
-  for entry in "${entries[@]}"; do
-    IFS=$'\t' read -r name key before after <<<"$entry"
-    print_header "$name ($((++i))/${#entries})"
-    echo "$key"
-    echo "  before: $before"
-    echo "  after:  $after"
-    choice=$(gum choose "Track (sync to other Macs)" "Ignore (never ask again)" "Skip (ask next time)") || return
-
-    case "$choice" in
-      Track*) echo "$key" >>"$PREFS_DIR/keys/$name.track"; tracked=1 ;;
-      Ignore*) echo "$key" >>"$PREFS_DIR/keys/$name.ignore" ;;
-      *) continue ;;
-    esac
-    jq --arg n "$name" --arg k "$key" 'del(.[$n][$k]) | with_entries(select(.value != {}))' \
-      "$PENDING" >"$PENDING.tmp" && mv "$PENDING.tmp" "$PENDING"
+  local entry name format config now
+  local -a parts copies
+  for entry in "${DOMAINS[@]}"; do
+    name="${entry%%:*}"
+    now="$tmp/$name.plist"
+    defaults export "$name" "$now" 2>/dev/null &&
+      copies+=("$name" plist "$now" "$BASELINE_DIR/$name.full.plist")
+  done
+  for entry in "${FILES[@]}"; do
+    parts=("${(@s.:.)entry}")
+    name="${parts[1]}"
+    format="${parts[2]}"
+    config="${parts[3]}"
+    now="$tmp/$name.json"
+    [[ -f "$config" ]] || continue
+    case "$format" in
+      toml) dasel -i toml -o json --var f="toml:file:$config" '$f' </dev/null >"$now" ;;
+      json) cp "$config" "$now" ;;
+    esac && copies+=("$name" json "$now" "$BASELINE_DIR/$name.full.json")
   done
 
-  (( tracked )) && cmd_export
-}
+  if [[ "$accept" == "--accept" ]]; then
+    local kind previous
+    for name kind now previous in "${copies[@]}"; do
+      cp "$now" "$previous"
+    done
+    print_success "Accepted the current settings"
+    return
+  fi
 
-# Runs once a day. StartCalendarInterval (unlike StartInterval) coalesces
-# missed firings and runs on the next wake, which matters on a laptop.
-cmd_install_agent() {
-  print_section "Install settings export agent"
+  python3 - "$PREFS_DIR/keys" "${copies[@]}" <<'PY'
+import fnmatch, hashlib, json, os, plistlib, sys
 
-  mkdir -p "$HOME/Library/LaunchAgents"
-  cat > "$AGENT_PLIST" <<PLIST
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-	<key>Label</key>
-	<string>$AGENT_LABEL</string>
-	<key>ProgramArguments</key>
-	<array>
-		<string>$DOTFILES_DIR/sync.sh</string>
-		<string>export</string>
-	</array>
-	<key>StartCalendarInterval</key>
-	<dict>
-		<key>Hour</key>
-		<integer>21</integer>
-		<key>Minute</key>
-		<integer>0</integer>
-	</dict>
-	<key>StandardOutPath</key>
-	<string>$HOME/Library/Logs/$AGENT_LABEL.log</string>
-	<key>StandardErrorPath</key>
-	<string>$HOME/Library/Logs/$AGENT_LABEL.log</string>
-</dict>
-</plist>
-PLIST
+keys_dir, rest = sys.argv[1], sys.argv[2:]
 
-  # The agent used to be named after prefs.sh and still points at that path.
-  launchctl bootout "gui/$UID/$LEGACY_AGENT_LABEL" 2>/dev/null
-  rm -f "$HOME/Library/LaunchAgents/$LEGACY_AGENT_LABEL.plist"
+def load(path, kind):
+    with open(path, "rb") as f:
+        return plistlib.load(f) if kind == "plist" else json.load(f)
 
-  launchctl bootout "gui/$UID/$AGENT_LABEL" 2>/dev/null
-  launchctl bootstrap "gui/$UID" "$AGENT_PLIST"
+# A file's allowlist names dotted paths into nested tables, so a file is
+# compared leaf by leaf; a tracked path also covers everything under it.
+def flatten(node, prefix=""):
+    out = {}
+    for k, v in node.items():
+        path = f"{prefix}{k}"
+        if isinstance(v, dict) and v:
+            out.update(flatten(v, path + "."))
+        else:
+            out[path] = v
+    return out
 
-  print_success "Agent installed - exports daily at 21:00"
+def tracked(name):
+    path = os.path.join(keys_dir, f"{name}.track")
+    if not os.path.exists(path):
+        return []
+    with open(path) as f:
+        return [l.strip() for l in f if l.strip() and not l.lstrip().startswith("#")]
+
+def show(value):
+    if value is None:
+        return "(unset)"
+    if isinstance(value, bytes):
+        return f"<{len(value)} bytes, sha1 {hashlib.sha1(value).hexdigest()[:8]}>"
+    text = json.dumps(value, ensure_ascii=False, default=str)
+    return text if len(text) <= 120 else text[:117] + "..."
+
+changes = {}
+for i in range(0, len(rest), 4):
+    name, kind, now_path, prev_path = rest[i:i + 4]
+    if not os.path.exists(prev_path):
+        print(f"{name}: nothing to compare with - run ./sync.sh changes --accept",
+              file=sys.stderr)
+        continue
+    now, prev = load(now_path, kind), load(prev_path, kind)
+    if kind == "json":
+        now, prev = flatten(now), flatten(prev)
+    patterns = tracked(name)
+
+    def listed(key):
+        return any(fnmatch.fnmatch(key, p) or key.startswith(p + ".") for p in patterns)
+
+    changed = {k: {"before": show(prev.get(k)), "after": show(now.get(k))}
+               for k in sorted(now.keys() | prev.keys())
+               if not listed(k) and now.get(k) != prev.get(k)}
+    if changed:
+        changes[name] = changed
+
+print(json.dumps(changes, indent=2, ensure_ascii=False))
+PY
 }
 
 case "${1:-}" in
   export)        cmd_export ;;
   import)        cmd_import ;;
-  review)        cmd_review ;;
-  # Run by the notification's click; not meant to be typed.
-  open-review)   cmd_open_review ;;
-  install-agent) cmd_install_agent ;;
+  changes)       cmd_changes "${2:-}" ;;
   *)
-    echo "Usage: ./sync.sh <export|import|review|install-agent>"
+    echo "Usage: ./sync.sh <export|import|changes [--accept]>"
     echo
     echo "  export         Snapshot app-owned settings into the repo"
     echo "  import         Apply the snapshots to this machine"
-    echo "  review         Track or ignore changed settings outside the lists"
-    echo "  install-agent  Run export daily via launchd"
+    echo "  changes        Print untracked settings changed since the last accept"
+    echo "    --accept     Take the current settings as the new starting point"
     exit 1
     ;;
 esac

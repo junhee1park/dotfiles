@@ -35,6 +35,6 @@ if [ -n "$FONT" ] && [ "$FONT" != "<<-quit" ]; then
     while pgrep -xq Rex; do sleep 0.2; done
   fi
   defaults write com.superlogical.rex Workspace.terminalFontName -string "$rex_font"
-  [[ -n "$rex_was_running" ]] && open -a "Rex Beta"
+  [[ -n "$rex_was_running" ]] && open -a Rex
   echo "Font changed to $FONT_DISPLAY"
 fi
