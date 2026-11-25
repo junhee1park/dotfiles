@@ -24,9 +24,7 @@ print_header "SoundSource"
 brew install --cask soundsource
 
 # Restores the settings that cannot be symlinked - the apps above that keep
-# theirs in a defaults domain, and Codex's config.toml - then schedules the
-# daily snapshot.
+# theirs in a defaults domain, and Codex's config.toml.
 "$DOTFILES_DIR/sync.sh" import
-"$DOTFILES_DIR/sync.sh" install-agent
 
 print_success "Utilities setup complete"
