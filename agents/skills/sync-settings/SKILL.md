@@ -46,13 +46,20 @@ command below from the repo root.
    line. For a config file, write the dotted path of the leaf or table to
    sync.
 
-5. Run `./sync.sh export`. It writes the tracked keys into the snapshots,
-   including changes to keys tracked earlier. Report any line that is not
-   `unchanged`, `updated` or `created`:
-   - `skipped - snapshot is newer`: another machine pushed newer values. Ask
-     before running `./sync.sh import`, which quits and reopens the apps.
-   - `the snapshot and this machine both changed`: show both sides and ask.
-   - `no key matched`: a tracked key is gone or renamed; say which.
+5. Run `./sync.sh export`. Key by key, it writes into the snapshots what
+   changed on this machine since the last sync, and leaves alone what changed
+   in the snapshot. Report any line that is not `unchanged`, `exported` or
+   `created`:
+   - `newer in the snapshot`: another machine changed these keys. Ask before
+     running `./sync.sh import`, which writes only those keys and quits and
+     reopens each app it writes to. If the agent runs inside one of those
+     apps, ask the user to run it from another terminal.
+   - `both changed <key>`: both sides changed it to different values. Show
+     both and ask which to keep. To keep this machine's value, set it in the
+     snapshot file; to take the snapshot's, set it in the app. The next
+     export sees both sides agree.
+   - `no key matched`: a tracked key is gone or renamed, unless the same key
+     is `newer in the snapshot` - then it is not imported yet. Say which.
 
 6. Once the user has answered for every key, run
    `./sync.sh changes --accept`. A skipped key comes up again only when it
