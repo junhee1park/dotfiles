@@ -41,33 +41,16 @@ end, { desc = "Only (keep floats/terminals)" })
 -- clear search with <esc>
 map({ "i", "n", "s" }, "<esc>", function()
   vim.cmd("noh")
-  -- :noh from a mapping isn't seen by hlslens; stop it so its position cache resets
-  -- and the next n/N/* re-sends search marks to the scrollbar
-  if package.loaded["hlslens"] then
-    vim.schedule(function()
-      require("hlslens").stop()
-      require("scrollbar.handlers.search").handler.hide()
-    end)
-  end
   return "<esc>"
 end, { expr = true, desc = "Escape and Clear hlsearch" })
 
 -- saner n/N: always search the same direction + center
--- <Cmd>…start() refreshes nvim-hlslens (search lens + scrollbar search marks) after the jump;
--- n/N are Lua functions because a <Cmd> in a string expr mapping's result never runs
-local hlslens_start = '<Cmd>lua require("hlslens").start()<CR>'
-map("n", "n", function()
-  return (vim.v.searchforward == 1 and "n" or "N") .. "zv" .. hlslens_start
-end, { expr = true, desc = "Next Search Result" })
+map("n", "n", "'Nn'[v:searchforward].'zv'", { expr = true, desc = "Next Search Result" })
 map("x", "n", "'Nn'[v:searchforward]", { expr = true, desc = "Next Search Result" })
 map("o", "n", "'Nn'[v:searchforward]", { expr = true, desc = "Next Search Result" })
-map("n", "N", function()
-  return (vim.v.searchforward == 1 and "N" or "n") .. "zv" .. hlslens_start
-end, { expr = true, desc = "Prev Search Result" })
+map("n", "N", "'nN'[v:searchforward].'zv'", { expr = true, desc = "Prev Search Result" })
 map("x", "N", "'nN'[v:searchforward]", { expr = true, desc = "Prev Search Result" })
 map("o", "N", "'nN'[v:searchforward]", { expr = true, desc = "Prev Search Result" })
-map("n", "*", "*" .. hlslens_start, { desc = "Search Word Forward" })
-map("n", "#", "#" .. hlslens_start, { desc = "Search Word Backward" })
 
 -- add undo break-points
 map("i", ",", ",<c-g>u")
