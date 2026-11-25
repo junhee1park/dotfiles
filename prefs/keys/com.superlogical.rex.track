@@ -8,3 +8,4 @@ Workspace.usesStandardInactiveWindowPaneStyles
 Workspace.showsActivePaneBorder
 rex.client.remoteControl
 rex.agents.names-sessions
+Workspace.terminalOptionKeyBehavior

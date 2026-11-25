@@ -3720,6 +3720,8 @@
 	<string>CaskaydiaMono Nerd Font</string>
 	<key>Workspace.terminalFontPointSize</key>
 	<real>14.0</real>
+	<key>Workspace.terminalOptionKeyBehavior</key>
+	<string>leftActsAsAlt</string>
 	<key>Workspace.usesStandardInactiveWindowPaneStyles</key>
 	<false/>
 	<key>rex.agents.names-sessions</key>
