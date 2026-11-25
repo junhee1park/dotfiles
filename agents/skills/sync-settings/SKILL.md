@@ -52,8 +52,7 @@ command below from the repo root.
    `created`:
    - `newer in the snapshot`: another machine changed these keys. Ask before
      running `./sync.sh import`, which writes only those keys and quits and
-     reopens each app it writes to. If the agent runs inside one of those
-     apps, ask the user to run it from another terminal.
+     reopens each app it writes to.
    - `both changed <key>`: both sides changed it to different values. Show
      both and ask which to keep. To keep this machine's value, set it in the
      snapshot file; to take the snapshot's, set it in the app. The next
