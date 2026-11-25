@@ -42,6 +42,8 @@
 	<true/>
 	<key>keyboardOverlayPosition</key>
 	<integer>4</integer>
+	<key>popupAutoCloseInterval</key>
+	<integer>15</integer>
 	<key>popupAutoCloseMode</key>
 	<integer>1</integer>
 	<key>showKeystrokes</key>
