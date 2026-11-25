@@ -23,8 +23,25 @@ local function term_nav(dir)
   end
 end
 
+local term_opts = { win = { position = "bottom" } }
+
 local function toggle_term()
-  require("snacks").terminal(nil, { win = { position = "bottom" } })
+  require("snacks").terminal(nil, term_opts)
+end
+
+-- Snacks.terminal.focus() hides when already focused; go back instead, like
+-- sidekick's <c-;>
+local function focus_term()
+  local term, created = require("snacks").terminal.get(nil, term_opts)
+  if created or not term then
+    return
+  end
+  if vim.api.nvim_get_current_win() == term.win then
+    vim.cmd.wincmd("p")
+    vim.cmd.stopinsert()
+  else
+    term:show():focus()
+  end
 end
 
 -- Permalink to the current file / visual line range on the remote (GitHub, ...).
@@ -222,8 +239,9 @@ return {
       -- ctrl+/ arrives as <c-/> or <c-_> depending on the terminal's key
       -- encoding, so bind both. Works inside the terminal too, like the
       -- sidekick <c-.> toggle.
-      { "<c-/>", toggle_term, desc = "Toggle Terminal", mode = { "n", "t", "i" } },
-      { "<c-_>", toggle_term, desc = "Toggle Terminal", mode = { "n", "t", "i" } },
+      { "<c-/>", toggle_term, desc = "Toggle Terminal", mode = { "n", "t", "i", "x" } },
+      { "<c-_>", toggle_term, desc = "Toggle Terminal", mode = { "n", "t", "i", "x" } },
+      { "<c-'>", focus_term, desc = "Toggle Terminal Focus", mode = { "n", "t", "i", "x" } },
     },
   },
 }

@@ -259,7 +259,7 @@ return {
           })
         end,
         desc = "Toggle Focus",
-        mode = { "n", "t" },
+        mode = { "n", "t", "i", "x" },
       },
       {
         "<c-,>",
@@ -278,7 +278,7 @@ return {
           end, { filter = { installed = true } })
         end,
         desc = "Toggle Layout (float/split)",
-        mode = { "n", "t" },
+        mode = { "n", "t", "i", "x" },
       },
       {
         "<leader>ac",

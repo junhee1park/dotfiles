@@ -8,7 +8,13 @@ return {
   },
   keys = {
     { "<leader>ee", "<Cmd>Neotree toggle<CR>", desc = "Neo-tree" },
-    { "<leader>eo", "<Cmd>Neotree focus<CR>", desc = "Neo-tree (focus)" },
+    {
+      "<leader>ef",
+      function()
+        vim.cmd(vim.bo.filetype == "neo-tree" and "wincmd p" or "Neotree focus")
+      end,
+      desc = "Neo-tree (focus)",
+    },
     { "<leader>eE", "<Cmd>Neotree reveal<CR>", desc = "Neo-tree (reveal file)" },
   },
   opts = {

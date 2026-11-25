@@ -108,9 +108,12 @@ end, { expr = true, desc = "Smart Tab" })
 map("n", "<leader>ba", "<cmd>b#<cr>", { desc = "Alternate" })
 
 -- quickfix
-map("n", "<leader>q", function()
+map("n", "<leader>qq", function()
   vim.cmd(vim.fn.getqflist({ winid = true }).winid ~= 0 and "cclose" or "copen")
 end, { desc = "Quickfix" })
+map("n", "<leader>qf", function()
+  vim.cmd(vim.bo.filetype == "qf" and "wincmd p" or "copen")
+end, { desc = "Quickfix (focus)" })
 
 -- diagnostics
 local diagnostic_goto = function(next, severity)

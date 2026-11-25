@@ -51,6 +51,7 @@ return {
       { "<leader>gh", group = "hunk", mode = { "n", "x" } },
       { "<leader>h", group = "hunk" },
       { "<leader>c", group = "conflict" },
+      { "<leader>q", group = "quickfix" },
       { "[", group = "prev" },
       { "]", group = "next" },
       -- built-in LSP maps, whose descs are the function names
