@@ -29,7 +29,7 @@ hs.hotkey.bind({ "cmd", "ctrl" }, "b", function()
 end)
 
 hs.hotkey.bind({ "cmd", "ctrl" }, "t", function()
-  moveWindowToFocusedSpace("Rex Beta")
+  moveWindowToFocusedSpace("Rex")
 end)
 
 hs.hotkey.bind({ "cmd", "ctrl" }, "n", function()
