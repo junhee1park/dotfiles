@@ -8,80 +8,36 @@ Open a pull request for the current branch with `gh pr create`, targeting the
 branch this one was cut from — `main` unless it is stacked on another branch.
 Push first if the branch has no upstream.
 
-When the work is a chain of branches that each build on the one below, open
-it as a GitHub stack with the `gh stack` extension. Do not open separate PRs
-whose bases point at each other. Create the stack with
-`gh stack init <bottom> ... <top>` and `gh stack submit`. Add PRs that are
-already open with `gh stack link <pr> ...`, listed from the bottom. After
-changing a lower branch, update the branches above it with `gh stack rebase`
-and `gh stack push`. A stack is one straight chain, so if the branches form a
-tree, say so and ask how to split them before opening anything. Each PR in
-the stack still gets its own title and body by the rules below; set them with
-`gh pr edit` when `submit` fills them in.
+When the work is a chain of branches, each built on the one below, open it as
+one GitHub stack with the `gh stack` extension instead of separate PRs based
+on each other. If the branches split like a tree, ask how to divide them
+first. Read its full help (`gh stack --help`, then the subcommand's `--help`)
+before any stack operation, and use its commands rather than `gh pr` or the
+REST API, which refuse or bypass stacked PRs.
 
-The `gh stack` extension is new and changes often, so read its full help
-(`gh stack --help`, then `gh stack <command> --help`, never truncated) before
-any stack operation, including merging and recovering from a merged or
-deleted base. Use its own commands over `gh pr` or the REST API, which refuse
-or bypass stacked PRs.
-
-Take the scope from the full diff against the base branch — the PR covers the
-whole branch, including commits made before this session or by someone else.
-
-Don't invent a rationale for a change you weren't part of. For those, describe
-what it does and leave it at that.
+The PR covers the whole branch against its base, including commits made
+before this session or by someone else.
 
 Title: same style as a commit subject — imperative mood, capitalized, no
 trailing period. It names the branch's change as a whole, not its last commit.
 
-Body: two or three sentences saying what the branch does. Then bullets only
-for decisions a reviewer would otherwise get wrong — an unexpected choice, a
-constraint that isn't visible in the code, a sequencing dependency — one
-sentence each. Usually there are none, and the body is just the summary. A PR
-body with no bullets is a good one, not a lazy one; never pad the list to have
-something in it.
+Body: say what the branch changes, and anything a reviewer could misjudge from
+the diff alone, such as an unexpected choice, a constraint the code doesn't
+show, or a sequencing dependency. Keep it short and use whatever form reads
+fastest; add a table or a diagram when it shows the change better than text.
 
-When the branch does two or more separable things, give each its own sentence
-instead of compressing them into one.
+When the diff changes what a user sees, show it in the PR as the project's
+guidance describes. Put the before, from the base branch with the same data
+and theme, next to the after so the reviewer can compare them; a new screen
+needs only the after. Add a GIF when the change moves, since a still cannot
+show it. Attach images with the `gh image` extension when it is installed. If
+you can't capture what the guidance asks for, say what you tried and ask how
+to proceed before opening the PR.
 
-The diff says what changed, CI says whether it works, and the issue says why
-it was asked for. Anything the body repeats from those three makes it longer
-without making it more useful. What's left over is the body, and it is short.
+Report the PR URL.
 
-Durable reasoning belongs in none of them — it goes in a code comment, where
-the next reader of that code finds it, rather than in a body that stops being
-read once the PR merges.
-
-Keep the body under 120 words, screenshots and their captions aside. When it
-runs longer, that isn't a body to trim: move what overflows to the comment or
-the issue where it belongs.
-
-No section headers. A body that needs them is too long. No test plan or
-checklist unless the user asks for one.
-
-Never link the Linear issue. The branch name already carries the issue
-identifier, which is what links the two and closes the issue on merge.
-
-When the diff changes anything a user sees, follow the project's guidance
-on showing it in the PR: whether to attach screenshots or recordings, and
-how to run the app to capture them. If you tried and could not do what it
-asks, ask the user how to proceed before opening the PR. Say what you
-tried and what stopped you.
-
-Show each changed screen as a before and after pair: the base branch on the
-left, this branch on the right, in a two-column table headed Before and After.
-A reviewer judges a UI change by comparing it, and a lone after shot hides what
-it replaced. Capture the before from the base branch under the same data and
-theme, which is easiest before the first edit. A screen that did not exist
-before gets an after alone.
-
-When the change moves (an animation, a hover, a transition, a flow over several
-steps), attach a GIF recorded from the app as well, since a still cannot show
-it. Record with `agent-browser record`, crop to the part that changes, and
-convert with ffmpeg.
-
-Attach images with the `gh image` extension when it is installed. The markdown
-it prints renders at the full width of the body; when that is too large, size
-the image with an `<img width>` tag instead.
-
-Report the PR URL. Do not merge it, and do not set the Linear issue to Done.
+Don't:
+- Invent a reason for a change you weren't part of; describe what it does.
+- Link the Linear issue. The branch name already links it and closes it on
+  merge.
+- Merge the PR or set the Linear issue to Done.
