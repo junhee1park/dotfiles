@@ -17,7 +17,9 @@ Title: what changes when the issue is done, or the symptom when the fix
 isn't decided.
 
 - English: imperative like a commit subject, or a noun phrase.
-- Korean: end in a noun form, never "~한다".
+- Korean: never "~한다". End an action in ~기, or write a noun phrase
+  from terms the product and its UI already use. Don't coin nouns to
+  force a noun ending.
 
 Write the description for whoever picks the issue up later, and only
 what they need to start that they can't see elsewhere. Linear already
@@ -27,8 +29,8 @@ and line numbers. Keep a fact from the code when it changes how the
 issue reads. Keep it short, with no headers.
 
 Body: open with the problem or the goal, plus the context needed to
-understand it. Write the content itself; don't prefix a line with a
-label and a colon. What follows depends on how much is settled:
+understand it. Write sentences, not labelled fields. What follows
+depends on how much is settled:
 
 - Spec decided: everything that was decided, so they can build it
   without asking again.
@@ -38,10 +40,25 @@ label and a colon. What follows depends on how much is settled:
   it with ~할 수 있음), without labelling it an option or marking it
   undecided.
 
-Body in Korean: noun-form endings and fragments by default. Never stop
-a fragment on a particle or a comma; end it on a noun or ~함/~음.
-Use ~다 only for a sentence that links cause and result and would
-lose that link if split.
+When something is left for later, say where it will be decided: later
+in this issue, or in another one.
 
-Refer to other issues and PRs as Linear mentions, not as plain text or
-URLs.
+In Korean titles and bodies, keep terms that are used in English as
+they are (UI labels, product and technical terms); translating them
+reads awkwardly.
+
+Body in Korean: mostly terse. Use ~다 only for a sentence that walks
+through how a situation unfolds; a single fact, decision, or task stays
+terse even in the opening.
+
+In the terse form, when the verb has an action-noun form, end on the
+noun itself rather than adding ~함; otherwise end on ~함/~음. Never end
+on a bare noun, a particle, or the ㅁ-form of a native Korean verb;
+rephrase that sentence around an action noun or a 하다 verb instead.
+Write a negative as a predicate (~없음, ~하지 않음), not as a
+negative-prefix noun.
+
+Mention, as a Linear mention, any issue this one depends on or overlaps
+with; never refer to issues or PRs as plain text or URLs. A parent
+issue's scope covers all its sub-issues; when a sub-issue falls outside
+it, update the parent.
