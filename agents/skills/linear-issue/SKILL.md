@@ -1,12 +1,17 @@
 ---
-name: create-linear-issue
-description: Create a Linear issue with the right assignment, status, project, and labels. Use whenever asked to create an issue, sub-issue, or follow-up.
+name: linear-issue
+description: Write a Linear issue's title and description, and set assignment, status, project, and labels when creating it. Use whenever asked to create an issue, sub-issue, or follow-up, or to change an existing issue's title or description.
 ---
 
-Create the Linear issue. When it is an offshoot of the user's current
-work (a sub-issue, a follow-up, a prerequisite), judging from the
+When creating an issue: if it is an offshoot of the user's current work
+(a sub-issue, a follow-up, a prerequisite), judging from the
 conversation and the current branch, assign it to the user as "Todo"
-and put it in the same project when that fits.
+and put it in the same project when that fits. Always inspect the
+team's existing labels and apply every label that fits the issue. Do
+not create a new label unless the user explicitly asks for one.
+
+The rest applies both when creating an issue and when changing its
+title or description.
 
 Title: what changes when the issue is done, or the symptom when the fix
 isn't decided.
@@ -40,6 +45,3 @@ lose that link if split.
 
 Refer to other issues and PRs as Linear mentions, not as plain text or
 URLs.
-
-Always inspect the team's existing labels and apply every label that fits the
-issue. Do not create a new label unless the user explicitly asks for one.
