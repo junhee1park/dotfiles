@@ -11,7 +11,8 @@ team's existing labels and apply every label that fits the issue. Do
 not create a new label unless the user explicitly asks for one.
 
 The rest applies both when creating an issue and when changing its
-title or description.
+title or description. When done, give the user a link to each issue
+created or changed.
 
 Title: what changes when the issue is done, or the symptom when the fix
 isn't decided.
