@@ -60,11 +60,20 @@ return {
           },
         },
       },
-      extensions = {
-        ["ui-select"] = { require("telescope.themes").get_cursor() },
-      },
     })
     require("telescope").load_extension("fzf")
-    require("telescope").load_extension("ui-select")
+
+    -- ui-select applies one theme to every select, so build one per theme.
+    -- Code actions act on the cursor position and open there; the rest center.
+    local ui_select = require("telescope._extensions.ui-select")
+    local themes = require("telescope.themes")
+    ui_select.setup({ themes.get_cursor() })
+    local cursor_select = vim.ui.select
+    ui_select.setup({ themes.get_dropdown() })
+    local dropdown_select = vim.ui.select
+    vim.ui.select = function(items, opts, on_choice)
+      local select = opts and opts.kind == "codeaction" and cursor_select or dropdown_select
+      return select(items, opts, on_choice)
+    end
   end,
 }
